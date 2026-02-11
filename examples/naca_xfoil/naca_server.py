@@ -14,7 +14,7 @@ import philote_mdo.general as pmdo
 from philote_examples import NacaDiscipline
 
 
-def run(n_points: int = 100, port: int = 50052):
+def run(n_points: int = 100, port: int = 50051):
     """Start the NACA airfoil discipline server.
 
     Parameters
@@ -22,13 +22,11 @@ def run(n_points: int = 100, port: int = 50052):
     n_points : int, optional
         Number of points in the output airfoil contour, by default 100.
     port : int, optional
-        Port to listen on, by default 50052.
+        Port to listen on, by default 50051.
     """
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
-    discipline = pmdo.ExplicitServer(
-        discipline=NacaDiscipline(n_points=n_points)
-    )
+    discipline = pmdo.ExplicitServer(discipline=NacaDiscipline(n_points=n_points))
     discipline.attach_to_server(server)
 
     server.add_insecure_port(f"[::]:{port}")

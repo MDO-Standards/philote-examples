@@ -19,7 +19,7 @@ import philote_mdo.general as pmdo
 from philote_examples import XfoilDiscipline
 
 
-def run(n_points: int = 100, port: int = 50051):
+def run(n_points: int = 100, port: int = 50052):
     """Start the XFOIL discipline server.
 
     Parameters
@@ -27,7 +27,7 @@ def run(n_points: int = 100, port: int = 50051):
     n_points : int, optional
         Number of points defining the airfoil geometry, by default 100.
     port : int, optional
-        Port to listen on, by default 50051.
+        Port to listen on, by default 50052.
     """
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 

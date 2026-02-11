@@ -32,7 +32,15 @@ def _start_server(discipline, port):
     return server
 
 
-def run(camber=2, camber_loc=4, thickness=12, alpha=5.0, reynolds=1e6, mach=0.0):
+def run(
+    camber=2,
+    camber_loc=4,
+    thickness=12,
+    alpha=5.0,
+    reynolds=1e6,
+    mach=0.0,
+    start_servers=True,
+):
     """Run a coupled NACA -> XFOIL analysis.
 
     Parameters
@@ -49,10 +57,15 @@ def run(camber=2, camber_loc=4, thickness=12, alpha=5.0, reynolds=1e6, mach=0.0)
         Reynolds number.
     mach : float
         Mach number.
+    start_servers : bool
+        Flag for that determines if this function spans the gRPC/Philote
+        servers. If False, the assumption is that the servers are already
+        running.
     """
-    # Start servers
-    naca_server = _start_server(NacaDiscipline(n_points=N_POINTS), NACA_PORT)
-    xfoil_server = _start_server(XfoilDiscipline(n_points=N_POINTS), XFOIL_PORT)
+    if start_servers:
+        # Start servers
+        naca_server = _start_server(NacaDiscipline(n_points=N_POINTS), NACA_PORT)
+        xfoil_server = _start_server(XfoilDiscipline(n_points=N_POINTS), XFOIL_PORT)
 
     naca_channel = grpc.insecure_channel(f"localhost:{NACA_PORT}")
     xfoil_channel = grpc.insecure_channel(f"localhost:{XFOIL_PORT}")
@@ -100,8 +113,9 @@ def run(camber=2, camber_loc=4, thickness=12, alpha=5.0, reynolds=1e6, mach=0.0)
     finally:
         naca_channel.close()
         xfoil_channel.close()
-        naca_server.stop(grace=1)
-        xfoil_server.stop(grace=1)
+        if start_servers:
+            naca_server.stop(grace=1)
+            xfoil_server.stop(grace=1)
 
 
 if __name__ == "__main__":
