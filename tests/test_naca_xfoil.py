@@ -57,10 +57,9 @@ def test_naca_xfoil_chain():
         prob.setup()
 
         # NACA 2412
-        prob.set_val("naca.digit_1", 2.0)
-        prob.set_val("naca.digit_2", 4.0)
-        prob.set_val("naca.digit_3", 1.0)
-        prob.set_val("naca.digit_4", 2.0)
+        prob.set_val("naca.camber", 2.0)
+        prob.set_val("naca.camber_loc", 4.0)
+        prob.set_val("naca.thickness", 12.0)
 
         # Flight conditions
         prob.set_val("xfoil.alpha", 5.0)
