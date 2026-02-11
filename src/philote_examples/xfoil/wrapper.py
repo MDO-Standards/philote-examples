@@ -53,9 +53,11 @@ def write_command_file(
         Maximum iterations for viscous solution, by default 100.
     """
     commands = [
+        "PLOP",  # Enter plotting options
+        "G",  # Toggle graphics off
+        "",  # Exit PLOP menu
         f"LOAD {airfoil_file}",
         "",  # Accept default name
-        "PANE",  # Smooth paneling
         "OPER",
         f"VISC {reynolds:.0f}",
         f"MACH {mach:.4f}",
@@ -109,7 +111,7 @@ def run_xfoil(xfoil_path: str, command_file: Path, timeout: float = 30.0) -> sub
 
 
 def parse_output_file(filepath: Path) -> dict:
-    """Parse XFOIL output file for a single operating point.
+    """Parse XFOIL polar output file for a single operating point.
 
     Parameters
     ----------
@@ -142,11 +144,10 @@ def parse_output_file(filepath: Path) -> dict:
         line = line.strip()
         if not line or line.startswith("-") or line.startswith("alpha"):
             continue
-        # Check if line starts with a number (data line)
         parts = line.split()
         if len(parts) >= 7:
             try:
-                float(parts[0])
+                [float(p) for p in parts[:7]]
                 data_line = line
                 break
             except ValueError:

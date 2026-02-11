@@ -39,12 +39,8 @@ class XfoilDiscipline(pmdo.ExplicitDiscipline):
 
     def setup(self):
         """Define inputs and outputs for the XFOIL discipline."""
-        # Read XFOIL path from environment
-        self.xfoil_path = os.environ.get("XFOIL_PATH")
-        if self.xfoil_path is None:
-            raise RuntimeError(
-                "XFOIL_PATH environment variable must be set to the path of the XFOIL executable"
-            )
+        # Read XFOIL path from environment, default to "xfoil" on PATH
+        self.xfoil_path = os.environ.get("XFOIL_PATH", "xfoil")
 
         # Flight condition inputs
         self.add_input("alpha", shape=(1,), units="deg")
