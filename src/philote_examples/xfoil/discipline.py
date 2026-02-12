@@ -36,6 +36,16 @@ class XfoilDiscipline(pmdo.ExplicitDiscipline):
         super().__init__()
         self.n_points = n_points
         self.xfoil_path = None
+        self.viscous = True
+
+    def initialize(self):
+        """Declare available options."""
+        self.add_option("viscous", "bool")
+
+    def set_options(self, options):
+        """Set option values from client."""
+        if "viscous" in options:
+            self.viscous = bool(options["viscous"])
 
     def setup(self):
         """Define inputs and outputs for the XFOIL discipline."""
@@ -44,8 +54,9 @@ class XfoilDiscipline(pmdo.ExplicitDiscipline):
 
         # Flight condition inputs
         self.add_input("alpha", shape=(1,), units="deg")
-        self.add_input("reynolds", shape=(1,), units="")
-        self.add_input("mach", shape=(1,), units="")
+        if self.viscous:
+            self.add_input("reynolds", shape=(1,), units="")
+            self.add_input("mach", shape=(1,), units="")
 
         # Airfoil geometry inputs
         self.add_input("airfoil_x", shape=(self.n_points,), units="")
@@ -77,10 +88,13 @@ class XfoilDiscipline(pmdo.ExplicitDiscipline):
         """
         # Extract inputs
         alpha = float(inputs["alpha"][0])
-        reynolds = float(inputs["reynolds"][0])
-        mach = float(inputs["mach"][0])
         airfoil_x = inputs["airfoil_x"]
         airfoil_y = inputs["airfoil_y"]
+
+        cmd_kwargs = dict(alpha=alpha, viscous=self.viscous)
+        if self.viscous:
+            cmd_kwargs["reynolds"] = float(inputs["reynolds"][0])
+            cmd_kwargs["mach"] = float(inputs["mach"][0])
 
         # Create temporary directory for XFOIL files
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -95,9 +109,7 @@ class XfoilDiscipline(pmdo.ExplicitDiscipline):
                 command_file,
                 airfoil_file,
                 output_file,
-                alpha=alpha,
-                reynolds=reynolds,
-                mach=mach,
+                **cmd_kwargs,
             )
 
             # Run XFOIL

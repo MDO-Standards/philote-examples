@@ -29,9 +29,10 @@ def write_command_file(
     airfoil_file: Path,
     output_file: Path,
     alpha: float,
-    reynolds: float,
+    reynolds: float = 0.0,
     mach: float = 0.0,
     n_iter: int = 100,
+    viscous: bool = True,
 ) -> None:
     """Generate XFOIL batch command script for a single operating point.
 
@@ -45,12 +46,14 @@ def write_command_file(
         Path where results will be written.
     alpha : float
         Angle of attack in degrees.
-    reynolds : float
-        Reynolds number.
+    reynolds : float, optional
+        Reynolds number, by default 0.0. Unused when viscous is False.
     mach : float, optional
         Mach number, by default 0.0.
     n_iter : int, optional
         Maximum iterations for viscous solution, by default 100.
+    viscous : bool, optional
+        Whether to run viscous analysis, by default True.
     """
     commands = [
         "PLOP",  # Enter plotting options
@@ -59,16 +62,21 @@ def write_command_file(
         f"LOAD {airfoil_file}",
         "",  # Accept default name
         "OPER",
-        f"VISC {reynolds:.0f}",
-        f"MACH {mach:.4f}",
-        f"ITER {n_iter}",
+    ]
+
+    if viscous:
+        commands.append(f"VISC {reynolds:.0f}")
+        commands.append(f"MACH {mach:.4f}")
+        commands.append(f"ITER {n_iter}")
+
+    commands.extend([
         "PACC",
         str(output_file),
         "",  # No dump file
         f"ALFA {alpha:.4f}",
         "",
         "QUIT",
-    ]
+    ])
 
     with open(filepath, "w") as f:
         f.write("\n".join(commands))
