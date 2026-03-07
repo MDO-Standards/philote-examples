@@ -53,6 +53,8 @@ class XfoilDiscipline(pmdo.ExplicitDiscipline):
         self.xfoil_path = os.environ.get("XFOIL_PATH")
         if self.xfoil_path is None:
             raise ValueError("Environment variable XFOIL_PATH not set. You must set XFOIL_PATH so the program can find xfoil.exe.")
+        elif not os.path.isfile(self.xfoil_path):
+            raise ValueError(f"Environment variable XFOIL_PATH set to {self.xfoil_path} which is not a file")
 
         # Flight condition inputs
         self.add_input("alpha", shape=(1,), units="deg")
