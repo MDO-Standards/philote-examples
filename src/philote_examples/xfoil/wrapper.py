@@ -69,13 +69,15 @@ def write_command_file(
         commands.append(f"MACH {mach:.4f}")
         commands.append(f"ITER {n_iter}")
 
+    dump_file = output_file.parent / "dump.dat" # same dir as output
     commands.extend([
         "PACC",
-        str(output_file),
-        "",  # No dump file
+        output_file.as_posix(),
+        dump_file.as_posix(),
         f"ALFA {alpha:.4f}",
         "",
         "QUIT",
+        "",
     ])
 
     with open(filepath, "w") as f:
@@ -115,6 +117,7 @@ def run_xfoil(xfoil_path: str, command_file: Path, timeout: float = 30.0) -> sub
             timeout=timeout,
             text=True,
         )
+
     return result
 
 
