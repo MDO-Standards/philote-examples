@@ -70,10 +70,11 @@ def write_command_file(
         commands.append(f"ITER {n_iter}")
 
     dump_file = output_file.parent / "dump.dat" # same dir as output
+    
     commands.extend([
         "PACC",
-        output_file.as_posix(),
-        dump_file.as_posix(),
+        str(output_file),
+        str(dump_file),
         f"ALFA {alpha:.4f}",
         "",
         "QUIT",
