@@ -9,12 +9,16 @@ This module provides two classes:
   coefficient outputs.
 """
 
+import logging
+
 import numpy as np
 import openmdao.api as om
 from openaerostruct.aerodynamics.aero_groups import AeroPoint
 from openaerostruct.geometry.geometry_group import Geometry
 from openaerostruct.geometry.utils import generate_mesh
 from philote_mdo.openmdao import OpenMdaoSubProblem
+
+logger = logging.getLogger(__name__)
 
 
 class OasAeroGroup(om.Group):
@@ -120,6 +124,12 @@ class OasDiscipline(OpenMdaoSubProblem):
             mesh = result
             twist_cp = None
 
+        logger.info(
+            "Mesh generated (type=%s, shape=%s)",
+            self._mesh_dict.get("wing_type", "unknown"),
+            mesh.shape,
+        )
+
         # --- surface dictionary ---
         surface = {
             "name": "wing",
@@ -157,6 +167,15 @@ class OasDiscipline(OpenMdaoSubProblem):
         self.add_mapped_output("CL", "aero_point_0.wing_perf.CL", shape=(1,), units="")
         self.add_mapped_output("CD", "aero_point_0.wing_perf.CD", shape=(1,), units="")
         self.add_mapped_output("CM", "aero_point_0.CM", shape=(3,), units="")
+
+        logger.info(
+            "OasDiscipline built (surface=%s, inputs=%d, outputs=%d)",
+            surface["name"],
+            len(self._input_map),
+            len(self._output_map),
+        )
+        logger.debug("Mapped inputs: %s", list(self._input_map.keys()))
+        logger.debug("Mapped outputs: %s", list(self._output_map.keys()))
 
     def set_options(self, options):
         pass

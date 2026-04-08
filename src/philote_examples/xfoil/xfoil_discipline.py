@@ -1,5 +1,6 @@
 """XFOIL Philote discipline for airfoil analysis."""
 
+import logging
 import os
 import tempfile
 from pathlib import Path
@@ -13,6 +14,8 @@ from philote_examples.xfoil.wrapper import (
     write_airfoil_file,
     write_command_file,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class XfoilDiscipline(pmdo.ExplicitDiscipline):
@@ -75,6 +78,12 @@ class XfoilDiscipline(pmdo.ExplicitDiscipline):
         self.add_output("cd", shape=(1,), units="")
         self.add_output("cm", shape=(1,), units="")
 
+        logger.info(
+            "XfoilDiscipline setup complete (n_points=%d, xfoil_path=%s)",
+            self.n_points,
+            self.xfoil_path,
+        )
+
     def compute(self, inputs, outputs):
         """Run XFOIL and compute aerodynamic coefficients.
 
@@ -98,6 +107,12 @@ class XfoilDiscipline(pmdo.ExplicitDiscipline):
         alpha = float(inputs["alpha"][0])
         airfoil_x = inputs["airfoil_x"]
         airfoil_y = inputs["airfoil_y"]
+
+        logger.debug(
+            "XfoilDiscipline.compute called (alpha=%.2f, viscous=%s)",
+            alpha,
+            self.viscous,
+        )
 
         cmd_kwargs = dict(alpha=alpha, viscous=self.viscous)
         if self.viscous:
@@ -130,3 +145,10 @@ class XfoilDiscipline(pmdo.ExplicitDiscipline):
         outputs["cl"] = np.array([results["cl"]])
         outputs["cd"] = np.array([results["cd"]])
         outputs["cm"] = np.array([results["cm"]])
+
+        logger.debug(
+            "XfoilDiscipline.compute finished (Cl=%.4f, Cd=%.6f, Cm=%.4f)",
+            results["cl"],
+            results["cd"],
+            results["cm"],
+        )
