@@ -1,4 +1,7 @@
 # philote-examples
+
+[![CI](https://github.com/MDO-Standards/philote-examples/actions/workflows/ci.yml/badge.svg)](https://github.com/MDO-Standards/philote-examples/actions/workflows/ci.yml)
+
 Examples for the AIAA MDO TC Standard Interface Working Group.
 
 ## Installation Instructions
