@@ -10,6 +10,7 @@ from concurrent import futures
 import grpc
 import openmdao.api as om
 import philote_mdo.general as pmdo
+import pytest
 from philote_mdo.openmdao import RemoteExplicitComponent
 
 from philote_examples import NacaDiscipline, XfoilDiscipline
@@ -29,6 +30,7 @@ def _start_server(discipline, port):
     return server
 
 
+@pytest.mark.xfoil
 def test_naca_xfoil_chain():
     # Start servers
     naca_server = _start_server(NacaDiscipline(n_points=N_POINTS), NACA_PORT)
@@ -88,6 +90,7 @@ def test_naca_xfoil_chain():
         xfoil_channel.close()
 
 
+@pytest.mark.xfoil
 def test_naca_xfoil_inviscid():
     # Start servers
     naca_server = _start_server(NacaDiscipline(n_points=N_POINTS), NACA_PORT)

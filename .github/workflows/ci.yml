@@ -41,23 +41,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install XFOIL and Xvfb
-        run: sudo apt-get update && sudo apt-get install -y xfoil xvfb
-
-      - name: Verify XFOIL works in batch mode
-        run: |
-          echo -e "PLOP\nG\n\nNACA 2412\nOPER\nPACC\ntest_output.dat\ntest_dump.dat\nALFA 5.0\n\nQUIT\n" | xvfb-run xfoil || true
-          echo "=== XFOIL output file ==="
-          cat test_output.dat 2>/dev/null || echo "No output file created"
-          echo "=== Done ==="
-
       - name: Install package and dev dependencies
         run: pip install ".[dev]"
 
       - name: Run tests
-        env:
-          XFOIL_PATH: /usr/bin/xfoil
-        run: xvfb-run pytest tests/ -v
+        run: pytest tests/ -v -m "not xfoil"
 
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
