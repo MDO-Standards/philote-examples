@@ -69,7 +69,7 @@ def _analytical_partials(discipline, camber, camber_loc, thickness):
         (2, 4, 12),  # NACA 2412 (cambered)
         (0, 0, 12),  # NACA 0012 (symmetric)
         (4, 4, 21),  # NACA 4421 (high camber)
-        (1, 5, 8),   # NACA 1508 (thin, camber at mid-chord)
+        (1, 5, 8),  # NACA 1508 (thin, camber at mid-chord)
     ],
     ids=["NACA2412", "NACA0012", "NACA4421", "NACA1508"],
 )

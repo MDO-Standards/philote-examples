@@ -60,17 +60,11 @@ class OasAeroGroup(om.Group):
             self.connect(var, f"aero_point_0.{var}")
 
         # Connect deformed mesh from Geometry to AeroPoint
-        self.connect(
-            f"{name}.mesh", f"aero_point_0.{name}.def_mesh"
-        )
-        self.connect(
-            f"{name}.mesh", f"aero_point_0.aero_states.{name}_def_mesh"
-        )
+        self.connect(f"{name}.mesh", f"aero_point_0.{name}.def_mesh")
+        self.connect(f"{name}.mesh", f"aero_point_0.aero_states.{name}_def_mesh")
 
         # Connect thickness-to-chord ratio to the wing performance component
-        self.connect(
-            f"{name}.t_over_c", f"aero_point_0.{name}_perf.t_over_c"
-        )
+        self.connect(f"{name}.t_over_c", f"aero_point_0.{name}_perf.t_over_c")
 
 
 class OasDiscipline(OpenMdaoSubProblem):
@@ -160,15 +154,9 @@ class OasDiscipline(OpenMdaoSubProblem):
         self.add_mapped_input("cg", "cg", shape=(3,), units="m")
 
         # --- map outputs (aerodynamic coefficients) ---
-        self.add_mapped_output(
-            "CL", "aero_point_0.wing_perf.CL", shape=(1,), units=""
-        )
-        self.add_mapped_output(
-            "CD", "aero_point_0.wing_perf.CD", shape=(1,), units=""
-        )
-        self.add_mapped_output(
-            "CM", "aero_point_0.CM", shape=(3,), units=""
-        )
+        self.add_mapped_output("CL", "aero_point_0.wing_perf.CL", shape=(1,), units="")
+        self.add_mapped_output("CD", "aero_point_0.wing_perf.CD", shape=(1,), units="")
+        self.add_mapped_output("CM", "aero_point_0.CM", shape=(3,), units="")
 
     def set_options(self, options):
         pass

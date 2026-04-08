@@ -92,8 +92,7 @@ def run(
         cm = prob.get_val("xfoil.cm")[0]
 
         print(
-            f"NACA {camber}{camber_loc}{thickness:02g} at alpha={alpha} deg "
-            f"(inviscid)"
+            f"NACA {camber}{camber_loc}{thickness:02g} at alpha={alpha} deg (inviscid)"
         )
         print(f"  Cl = {cl:.4f}")
         print(f"  Cd = {cd:.6f}")

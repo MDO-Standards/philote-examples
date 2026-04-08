@@ -1,7 +1,11 @@
 """NACA 4-digit airfoil Philote discipline."""
 
+import logging
+
 import numpy as np
 import philote_mdo.general as pmdo
+
+logger = logging.getLogger(__name__)
 
 
 class NacaDiscipline(pmdo.ExplicitDiscipline):
@@ -33,6 +37,8 @@ class NacaDiscipline(pmdo.ExplicitDiscipline):
         self.add_output("airfoil_x", shape=(self.n_points,), units="")
         self.add_output("airfoil_y", shape=(self.n_points,), units="")
 
+        logger.info("NacaDiscipline setup complete (n_points=%d)", self.n_points)
+
     def setup_partials(self):
         """Declare all partial derivatives."""
         for output in ("airfoil_x", "airfoil_y"):
@@ -52,6 +58,13 @@ class NacaDiscipline(pmdo.ExplicitDiscipline):
         m = float(inputs["camber"][0]) / 100.0
         p = float(inputs["camber_loc"][0]) / 10.0
         t = float(inputs["thickness"][0]) / 100.0
+
+        logger.debug(
+            "NacaDiscipline.compute called (camber=%.1f, camber_loc=%.1f, thickness=%.1f)",
+            inputs["camber"][0],
+            inputs["camber_loc"][0],
+            inputs["thickness"][0],
+        )
 
         x_upper, x_lower = self._x_stations()
 
@@ -103,12 +116,8 @@ class NacaDiscipline(pmdo.ExplicitDiscipline):
         # Camber, slope, and their partials w.r.t. m and p
         _, dyc_u = _camber(x_upper, m, p)
         _, dyc_l = _camber(x_lower, m, p)
-        dyc_dm_u, dyc_dp_u, ddyc_dm_u, ddyc_dp_u = _camber_partials(
-            x_upper, m, p
-        )
-        dyc_dm_l, dyc_dp_l, ddyc_dm_l, ddyc_dp_l = _camber_partials(
-            x_lower, m, p
-        )
+        dyc_dm_u, dyc_dp_u, ddyc_dm_u, ddyc_dp_u = _camber_partials(x_upper, m, p)
+        dyc_dm_l, dyc_dp_l, ddyc_dm_l, ddyc_dp_l = _camber_partials(x_lower, m, p)
 
         # Precompute trig and arctan derivative factor
         theta_u = np.arctan(dyc_u)
@@ -185,11 +194,7 @@ def _thickness_poly(x):
         Polynomial values such that yt = 5 * t * poly(x).
     """
     return (
-        0.2969 * np.sqrt(x)
-        - 0.1260 * x
-        - 0.3516 * x**2
-        + 0.2843 * x**3
-        - 0.1015 * x**4
+        0.2969 * np.sqrt(x) - 0.1260 * x - 0.3516 * x**2 + 0.2843 * x**3 - 0.1015 * x**4
     )
 
 
@@ -242,9 +247,7 @@ def _camber(x, m, p):
     yc[fwd] = (m / p**2) * (2.0 * p * x[fwd] - x[fwd] ** 2)
     dyc[fwd] = (2.0 * m / p**2) * (p - x[fwd])
 
-    yc[aft] = (m / (1.0 - p) ** 2) * (
-        (1.0 - 2.0 * p) + 2.0 * p * x[aft] - x[aft] ** 2
-    )
+    yc[aft] = (m / (1.0 - p) ** 2) * ((1.0 - 2.0 * p) + 2.0 * p * x[aft] - x[aft] ** 2)
     dyc[aft] = (2.0 * m / (1.0 - p) ** 2) * (p - x[aft])
 
     return yc, dyc
