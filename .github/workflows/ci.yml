@@ -41,8 +41,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install XFOIL
-        run: sudo apt-get update && sudo apt-get install -y xfoil
+      - name: Install XFOIL and Xvfb
+        run: sudo apt-get update && sudo apt-get install -y xfoil xvfb
 
       - name: Install package and dev dependencies
         run: pip install ".[dev]"
@@ -50,7 +50,7 @@ jobs:
       - name: Run tests
         env:
           XFOIL_PATH: /usr/bin/xfoil
-        run: pytest tests/ -v
+        run: xvfb-run pytest tests/ -v
 
   publish:
     if: startsWith(github.ref, 'refs/tags/v')

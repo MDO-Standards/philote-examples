@@ -8,7 +8,6 @@ import time
 from concurrent import futures
 
 import grpc
-import numpy as np
 import openmdao.api as om
 import philote_mdo.general as pmdo
 from philote_mdo.openmdao import RemoteExplicitComponent
@@ -72,7 +71,7 @@ def test_naca_xfoil_chain():
         cd = prob.get_val("xfoil.cd")[0]
         cm = prob.get_val("xfoil.cm")[0]
 
-        print(f"NACA 2412 at alpha=5 deg, Re=1e6:")
+        print("NACA 2412 at alpha=5 deg, Re=1e6:")
         print(f"  Cl = {cl:.4f}")
         print(f"  Cd = {cd:.6f}")
         print(f"  Cm = {cm:.4f}")
@@ -129,7 +128,7 @@ def test_naca_xfoil_inviscid():
         cd = prob.get_val("xfoil.cd")[0]
         cm = prob.get_val("xfoil.cm")[0]
 
-        print(f"NACA 2412 at alpha=5 deg (inviscid):")
+        print("NACA 2412 at alpha=5 deg (inviscid):")
         print(f"  Cl = {cl:.4f}")
         print(f"  Cd = {cd:.6f}")
         print(f"  Cm = {cm:.4f}")
