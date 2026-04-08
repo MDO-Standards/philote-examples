@@ -46,7 +46,7 @@ const config: Config = {
                     remarkPlugins: [remarkMath],
                     rehypePlugins: [rehypeKatex],
                     editUrl:
-                        "https://github.com/MDO-Standards/philote-examples/tree/main/docs/",
+                        "https://github.com/MDO-Standards/philote-examples/tree/develop/docs/",
                     lastVersion: "current",
                     versions: {
                         current: {
