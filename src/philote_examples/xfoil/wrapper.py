@@ -1,12 +1,18 @@
 """Low-level XFOIL file I/O and subprocess wrapper."""
 
+import logging
 import subprocess
+import time
 from pathlib import Path
 
 import numpy as np
 
+logger = logging.getLogger(__name__)
 
-def write_airfoil_file(coords_x: np.ndarray, coords_y: np.ndarray, filepath: Path) -> None:
+
+def write_airfoil_file(
+    coords_x: np.ndarray, coords_y: np.ndarray, filepath: Path
+) -> None:
     """Write airfoil coordinates to a file in XFOIL format.
 
     Parameters
@@ -22,6 +28,8 @@ def write_airfoil_file(coords_x: np.ndarray, coords_y: np.ndarray, filepath: Pat
         f.write("Airfoil\n")
         for x, y in zip(coords_x, coords_y):
             f.write(f" {x: .6f}  {y: .6f}\n")
+
+    logger.debug("Airfoil file written (%d points, path=%s)", len(coords_x), filepath)
 
 
 def write_command_file(
@@ -69,23 +77,32 @@ def write_command_file(
         commands.append(f"MACH {mach:.4f}")
         commands.append(f"ITER {n_iter}")
 
-    dump_file = output_file.parent / "dump.dat" # same dir as output
-    
-    commands.extend([
-        "PACC",
-        str(output_file),
-        str(dump_file),
-        f"ALFA {alpha:.4f}",
-        "",
-        "QUIT",
-        "",
-    ])
+    dump_file = output_file.parent / "dump.dat"  # same dir as output
+
+    commands.extend(
+        [
+            "PACC",
+            str(output_file),
+            str(dump_file),
+            f"ALFA {alpha:.4f}",
+            "",
+            "QUIT",
+            "",
+        ]
+    )
 
     with open(filepath, "w") as f:
         f.write("\n".join(commands))
 
+    mode = "viscous" if viscous else "inviscid"
+    logger.debug(
+        "Command file written (path=%s, mode=%s, alpha=%.4f)", filepath, mode, alpha
+    )
 
-def run_xfoil(xfoil_path: str, command_file: Path, timeout: float = 30.0) -> subprocess.CompletedProcess:
+
+def run_xfoil(
+    xfoil_path: str, command_file: Path, timeout: float = 30.0
+) -> subprocess.CompletedProcess:
     """Execute XFOIL via subprocess.
 
     Parameters
@@ -109,15 +126,27 @@ def run_xfoil(xfoil_path: str, command_file: Path, timeout: float = 30.0) -> sub
     subprocess.CalledProcessError
         If XFOIL returns a non-zero exit code.
     """
-    with open(command_file, "r") as f:
+    logger.info("Starting XFOIL subprocess (timeout=%.1fs)", timeout)
+    t0 = time.monotonic()
+
+    with open(command_file) as f:
         result = subprocess.run(
             [xfoil_path],
             stdin=f,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             timeout=timeout,
             text=True,
         )
+
+    elapsed = time.monotonic() - t0
+    logger.debug(
+        "XFOIL subprocess completed (returncode=%d, elapsed=%.2fs)",
+        result.returncode,
+        elapsed,
+    )
+
+    if result.stderr and result.stderr.strip():
+        logger.warning("XFOIL stderr output: %s", result.stderr.strip())
 
     return result
 
@@ -147,7 +176,7 @@ def parse_output_file(filepath: Path) -> dict:
     ValueError
         If the output file cannot be parsed or contains no data.
     """
-    with open(filepath, "r") as f:
+    with open(filepath) as f:
         lines = f.readlines()
 
     # Find the data line (skip headers)
@@ -169,7 +198,7 @@ def parse_output_file(filepath: Path) -> dict:
         raise ValueError(f"No valid data found in output file: {filepath}")
 
     parts = data_line.split()
-    return {
+    parsed = {
         "alpha": float(parts[0]),
         "cl": float(parts[1]),
         "cd": float(parts[2]),
@@ -178,3 +207,13 @@ def parse_output_file(filepath: Path) -> dict:
         "top_xtr": float(parts[5]),
         "bot_xtr": float(parts[6]),
     }
+
+    logger.debug(
+        "Output file parsed (alpha=%.2f, Cl=%.4f, Cd=%.6f, Cm=%.4f)",
+        parsed["alpha"],
+        parsed["cl"],
+        parsed["cd"],
+        parsed["cm"],
+    )
+
+    return parsed
