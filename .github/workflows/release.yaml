@@ -271,6 +271,12 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
+    # ── Trigger PyPI publish ──────────────────────────────────────────
+    - name: Trigger PyPI publish workflow
+      env:
+        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+      run: gh workflow run publish-pypi.yaml
+
     # ── Merge back to develop ───────────────────────────────────────
     - name: Merge main back to develop
       env:
