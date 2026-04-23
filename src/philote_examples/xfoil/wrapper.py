@@ -26,7 +26,7 @@ def write_airfoil_file(
     """
     with open(filepath, "w") as f:
         f.write("Airfoil\n")
-        for x, y in zip(coords_x, coords_y):
+        for x, y in zip(coords_x, coords_y, strict=True):
             f.write(f" {x: .6f}  {y: .6f}\n")
 
     logger.debug("Airfoil file written (%d points, path=%s)", len(coords_x), filepath)

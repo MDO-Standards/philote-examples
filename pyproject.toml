@@ -4,17 +4,32 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "philote-examples"
-version = "0.1.0"
+version = "0.0.0"
 description = "Example Philote disciplines for MDO applications"
 readme = "README.md"
 license = {text = "MIT"}
-requires-python = ">=3.8"
+authors = [{name = "Christopher Lupp"}]
+keywords = ["mdo", "optimization", "philote", "aerodynamics"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.12",
+]
+requires-python = ">=3.10"
 dependencies = [
     "philote-mdo",
     "openmdao",
     "openaerostruct",
     "numpy",
 ]
+
+[project.urls]
+Homepage = "https://mdo-standards.github.io/philote-examples/"
+Repository = "https://github.com/MDO-Standards/philote-examples"
+Documentation = "https://mdo-standards.github.io/philote-examples/"
 
 [project.optional-dependencies]
 dev = [
@@ -35,7 +50,7 @@ markers = [
 ]
 
 [tool.ruff]
-target-version = "py38"
+target-version = "py310"
 line-length = 88
 src = ["src", "tests", "examples"]
 
