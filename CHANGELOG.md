@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-23
+
 ## [0.1.0] - 2026-04-23
 
 ### Features
@@ -18,5 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI pipeline with linting (ruff) and testing.
 - Pre-commit hooks for code formatting.
 
-[Unreleased]: https://github.com/MDO-Standards/philote-examples/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/MDO-Standards/philote-examples/releases/tag/v0.1.0
+[Unreleased]: https://github.com/MDO-Standards/philote-examples/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/MDO-Standards/philote-examples/releases/tag/v0.2.0
