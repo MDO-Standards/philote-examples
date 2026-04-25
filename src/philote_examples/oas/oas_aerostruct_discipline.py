@@ -129,10 +129,10 @@ class OasAerostructDiscipline(OpenMdaoSubProblem):
         self._mesh_dict = mesh_dict
         self._surface_options = surface_options
         super().__init__()
-        self._build_discipline()
 
     def initialize(self):
-        pass
+        self.add_option("mesh_dict", "dict")
+        self.add_option("surface", "dict")
 
     def _build_discipline(self):
         """Generate mesh, build the aerostructural group, and map variables."""
@@ -192,6 +192,9 @@ class OasAerostructDiscipline(OpenMdaoSubProblem):
 
         if self._surface_options is not None:
             surface.update(self._surface_options)
+            for key, val in surface.items():
+                if isinstance(val, list):
+                    surface[key] = np.array(val)
 
         # --- build OpenMDAO group ---
         self.add_group(OasAerostructGroup(surface=surface))
@@ -232,4 +235,11 @@ class OasAerostructDiscipline(OpenMdaoSubProblem):
         )
 
     def set_options(self, options):
-        pass
+        if "mesh_dict" in options:
+            self._mesh_dict = dict(options["mesh_dict"])
+        if "surface" in options:
+            self._surface_options = dict(options["surface"])
+
+    def setup(self):
+        self._build_discipline()
+        super().setup()
