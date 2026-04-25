@@ -20,7 +20,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "philote-mdo",
+    "philote-mdo>=0.8",
     "openmdao",
     "openaerostruct",
     "numpy",
