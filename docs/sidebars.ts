@@ -17,6 +17,7 @@ const sidebars: SidebarsConfig = {
                 "disciplines/naca-airfoil",
                 "disciplines/xfoil-analysis",
                 "disciplines/oas-vlm",
+                "disciplines/oas-aerostruct",
             ],
         },
         {
@@ -25,6 +26,7 @@ const sidebars: SidebarsConfig = {
             items: [
                 "tutorials/naca-xfoil-analysis",
                 "tutorials/oas-vlm-analysis",
+                "tutorials/oas-aerostruct-analysis",
             ],
         },
         {
@@ -34,6 +36,7 @@ const sidebars: SidebarsConfig = {
                 "api/naca-discipline",
                 "api/xfoil-discipline",
                 "api/oas-discipline",
+                "api/oas-aerostruct-disciplines",
             ],
         },
         {
