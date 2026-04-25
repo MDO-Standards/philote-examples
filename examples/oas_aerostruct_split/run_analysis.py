@@ -104,8 +104,8 @@ def run(
 
         # Coupled group with MDA solver
         coupled = om.Group()
-        coupled.add_subsystem("aero", RemoteExplicitComponent(channel=aero_channel))
         coupled.add_subsystem("struct", RemoteExplicitComponent(channel=struct_channel))
+        coupled.add_subsystem("aero", RemoteExplicitComponent(channel=aero_channel))
 
         # Coupling connections
         coupled.connect("aero.loads", "struct.loads")
@@ -121,11 +121,6 @@ def run(
 
         model.add_subsystem("coupled", coupled)
 
-        # Connect geometry outputs to the aero discipline
-        model.connect("wing.mesh", "coupled.aero.mesh")
-        model.connect("wing.nodes", "coupled.aero.nodes")
-        model.connect("wing.t_over_c", "coupled.aero.t_over_c")
-
         # Connect geometry outputs to the structural discipline
         model.connect("wing.nodes", "coupled.struct.nodes")
         model.connect(
@@ -134,6 +129,11 @@ def run(
         )
         model.connect("wing.radius", "coupled.struct.radius")
         model.connect("wing.thickness", "coupled.struct.thickness")
+
+        # Connect geometry outputs to the aero discipline
+        model.connect("wing.mesh", "coupled.aero.mesh")
+        model.connect("wing.nodes", "coupled.aero.nodes")
+        model.connect("wing.t_over_c", "coupled.aero.t_over_c")
 
         # Connect flow conditions to the aero discipline
         for var in ("v", "alpha", "Mach_number", "re", "rho"):
