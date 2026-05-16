@@ -94,13 +94,9 @@ class OasDiscipline(OpenMdaoSubProblem):
         self._surface_options = surface_options
         super().__init__()
 
-        # The base-class __init__ chain calls initialize() before setting
-        # _input_map/_output_map/_prob, then resets them to empty.  We must
-        # therefore perform all setup after super().__init__() completes.
-        self._build_discipline()
-
     def initialize(self):
-        pass
+        self.add_option("mesh_dict", "dict")
+        self.add_option("surface", "dict")
 
     def _build_discipline(self):
         """Generate mesh, build the OAS group, and map variables."""
@@ -151,6 +147,10 @@ class OasDiscipline(OpenMdaoSubProblem):
 
         if self._surface_options is not None:
             surface.update(self._surface_options)
+            # Protobuf Struct serializes arrays as lists; convert back
+            for key, val in surface.items():
+                if isinstance(val, list):
+                    surface[key] = np.array(val)
 
         # --- build OpenMDAO group ---
         self.add_group(OasAeroGroup(surface=surface))
@@ -178,4 +178,11 @@ class OasDiscipline(OpenMdaoSubProblem):
         logger.debug("Mapped outputs: %s", list(self._output_map.keys()))
 
     def set_options(self, options):
-        pass
+        if "mesh_dict" in options:
+            self._mesh_dict = dict(options["mesh_dict"])
+        if "surface" in options:
+            self._surface_options = dict(options["surface"])
+
+    def setup(self):
+        self._build_discipline()
+        super().setup()

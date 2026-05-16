@@ -57,19 +57,30 @@ When `mesh_dict` is `None`, the following default is used:
 | `with_viscous` | `False` | Enable viscous drag estimation |
 | `with_wave` | `False` | Enable wave drag estimation |
 
+## Philote Options
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `mesh_dict` | dict | Overrides `mesh_dict` constructor argument |
+| `surface` | dict | Overrides `surface_options` constructor argument |
+
 ## Methods
 
 ### `initialize()`
 
-No-op. Required by the base class interface.
+Declares `mesh_dict` and `surface` as available Philote options.
 
 ### `set_options(options)`
 
-No-op. This discipline has no client-configurable options.
+Stores option values from the client. Called automatically by the Philote framework when a client sends options via `send_options()`.
+
+### `setup()`
+
+Builds the discipline (mesh generation, group creation, variable mapping) then calls the base class `setup()` to initialize the internal OpenMDAO problem.
 
 ### `_build_discipline()`
 
-Internal method called by the constructor. Performs all setup:
+Internal method called by `setup()`. Performs all setup:
 
 1. **Generates the mesh** using `openaerostruct.geometry.utils.generate_mesh`.
 2. **Builds the surface dictionary** with default properties merged with `surface_options`.
