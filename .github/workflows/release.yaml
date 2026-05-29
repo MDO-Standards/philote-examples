@@ -18,6 +18,9 @@ jobs:
       (contains(github.event.pull_request.labels.*.name, 'release') ||
        contains(github.event.pull_request.labels.*.name, 'prerelease'))
     runs-on: ubuntu-latest
+    outputs:
+      tag_version: ${{ steps.version.outputs.tag_version }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
 
     steps:
     # ── Checkout ──────────────────────────────────────────────────────
@@ -271,17 +274,33 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
-    # ── Trigger PyPI publish ──────────────────────────────────────────
-    - name: Trigger PyPI publish workflow
-      env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-      run: gh workflow run publish-pypi.yaml
+  # ── Publish to PyPI (reusable workflow call) ───────────────────────
+  publish-pypi:
+    needs: release
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/publish-pypi.yaml
 
-    # ── Merge back to develop ───────────────────────────────────────
+  # ── Merge main back to develop ─────────────────────────────────────
+  merge-back:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout main
+      uses: actions/checkout@v4
+      with:
+        ref: main
+        fetch-depth: 0
+        token: ${{ secrets.RELEASE_TOKEN }}
+
     - name: Merge main back to develop
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       run: |
+        git config user.name  "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
         git fetch origin develop
         git checkout develop
 
@@ -294,6 +313,6 @@ jobs:
           gh pr create \
             --base develop \
             --head main \
-            --title "chore: merge release ${{ steps.version.outputs.tag_version }} back to develop" \
+            --title "chore: merge release ${{ needs.release.outputs.tag_version }} back to develop" \
             --body "Automatic merge of release changes back to develop failed due to conflicts. Please resolve manually."
         fi
