@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.0] - 2026-05-29
 
+Re-release of 0.4.0 with no functional changes. Created by an unintended
+re-run of the release workflow after a transient PyPI publish failure.
+
 ## [0.4.0] - 2026-05-29
 
 ### Features
