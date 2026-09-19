@@ -72,7 +72,7 @@ jobs:
         TAG_PARENT=$(git rev-parse "${LATEST_TAG}^" 2>/dev/null || echo "")
         if [ "$TAG_PARENT" = "$PR_MERGE_SHA" ]; then
           echo "::error::PR #${{ github.event.pull_request.number }} (merge ${PR_MERGE_SHA}) was already released as ${LATEST_TAG}."
-          echo "::error::Re-running this workflow would create a duplicate release. Re-run only the failed downstream job (publish-pypi or merge-back) instead."
+          echo "::error::Re-running this workflow would create a duplicate release. Re-run only the failed merge-back job, or the publish-pypi.yaml workflow, instead."
           exit 1
         fi
 
@@ -298,13 +298,9 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
-  # ── Publish to PyPI (reusable workflow call) ───────────────────────
-  publish-pypi:
-    needs: release
-    permissions:
-      id-token: write
-      contents: read
-    uses: ./.github/workflows/publish-pypi.yaml
+  # PyPI publishing runs in publish-pypi.yaml, triggered by the tag pushed
+  # above. It can't be called from here: this run's ref is the PR merge ref,
+  # which the pypi environment rejects.
 
   # ── Merge main back to develop ─────────────────────────────────────
   merge-back:

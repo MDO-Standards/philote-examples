@@ -1,10 +1,12 @@
 name: Upload Python Package
 
+# Runs on the release tag pushed by release.yaml. A tag push runs with the
+# tag as its ref, which the pypi environment allows and which checks out the
+# version-bumped commit. workflow_dispatch on main is kept for manual recovery.
 on:
-  release:
-    types: [published]
+  push:
+    tags: ['v*']
   workflow_dispatch:
-  workflow_call:
 
 permissions:
   id-token: write
