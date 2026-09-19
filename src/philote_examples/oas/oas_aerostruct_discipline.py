@@ -228,6 +228,10 @@ class OasAerostructDiscipline(OpenMdaoSubProblem):
             "structural_mass", "wing.structural_mass", shape=(1,), units="kg"
         )
 
+        # --- declare partials (lift and drag with respect to angle of attack) ---
+        self.declare_subproblem_partial("CD", "alpha")
+        self.declare_subproblem_partial("CL", "alpha")
+
         logger.info(
             "OasAerostructDiscipline built (inputs=%d, outputs=%d)",
             len(self._input_map),

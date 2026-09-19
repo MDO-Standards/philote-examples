@@ -18,6 +18,9 @@ jobs:
       (contains(github.event.pull_request.labels.*.name, 'release') ||
        contains(github.event.pull_request.labels.*.name, 'prerelease'))
     runs-on: ubuntu-latest
+    outputs:
+      tag_version: ${{ steps.version.outputs.tag_version }}
+      is_prerelease: ${{ steps.version.outputs.is_prerelease }}
 
     steps:
     # ── Checkout ──────────────────────────────────────────────────────
@@ -50,6 +53,30 @@ jobs:
         git config user.signingkey "${KEY_ID}"
         git config commit.gpgsign true
         git config tag.gpgsign true
+
+    # ── Guard against re-running an already-released PR ──────────────
+    # If the most recent tag's parent commit is this PR's merge commit,
+    # the workflow already completed for this PR. A re-run would bump
+    # the version again and create a duplicate release (this is how the
+    # spurious v0.5.0 came to exist).
+    - name: Detect duplicate release re-run
+      env:
+        PR_MERGE_SHA: ${{ github.event.pull_request.merge_commit_sha }}
+      run: |
+        LATEST_TAG=$(git tag -l 'v*' --sort=-v:refname | head -n1)
+        if [ -z "$LATEST_TAG" ]; then
+          echo "No prior tags; proceeding with first release."
+          exit 0
+        fi
+
+        TAG_PARENT=$(git rev-parse "${LATEST_TAG}^" 2>/dev/null || echo "")
+        if [ "$TAG_PARENT" = "$PR_MERGE_SHA" ]; then
+          echo "::error::PR #${{ github.event.pull_request.number }} (merge ${PR_MERGE_SHA}) was already released as ${LATEST_TAG}."
+          echo "::error::Re-running this workflow would create a duplicate release. Re-run only the failed downstream job (publish-pypi or merge-back) instead."
+          exit 1
+        fi
+
+        echo "No prior release detected for this PR. Proceeding."
 
     # ── Extract and validate PR labels ───────────────────────────────
     - name: Extract labels
@@ -271,17 +298,33 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
-    # ── Trigger PyPI publish ──────────────────────────────────────────
-    - name: Trigger PyPI publish workflow
-      env:
-        GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
-      run: gh workflow run publish-pypi.yaml
+  # ── Publish to PyPI (reusable workflow call) ───────────────────────
+  publish-pypi:
+    needs: release
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/publish-pypi.yaml
 
-    # ── Merge back to develop ───────────────────────────────────────
+  # ── Merge main back to develop ─────────────────────────────────────
+  merge-back:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout main
+      uses: actions/checkout@v4
+      with:
+        ref: main
+        fetch-depth: 0
+        token: ${{ secrets.RELEASE_TOKEN }}
+
     - name: Merge main back to develop
       env:
         GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       run: |
+        git config user.name  "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
         git fetch origin develop
         git checkout develop
 
@@ -294,6 +337,6 @@ jobs:
           gh pr create \
             --base develop \
             --head main \
-            --title "chore: merge release ${{ steps.version.outputs.tag_version }} back to develop" \
+            --title "chore: merge release ${{ needs.release.outputs.tag_version }} back to develop" \
             --body "Automatic merge of release changes back to develop failed due to conflicts. Please resolve manually."
         fi
