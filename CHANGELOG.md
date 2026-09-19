@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- `OasAerostructDiscipline` now declares the partial derivatives of `CD` and `CL` with respect to `alpha`. It previously declared none, so a gradient request failed on the server.
+
 ## [0.5.0] - 2026-05-29
 
 Re-release of 0.4.0 with no functional changes. Created by an unintended
